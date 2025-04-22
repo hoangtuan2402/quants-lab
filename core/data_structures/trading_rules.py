@@ -12,6 +12,9 @@ class TradingRules(DataStructureBase):
     def get_all_trading_pairs(self):
         return list(set([tr.trading_pair for tr in self.data]))
 
+    def get_custom_trading_pairs(self):
+        return ["BTC-USDT"]
+
     def filter_by_base_asset(self, base_asset: str):
         return TradingRules([tr for tr in self.data if tr.trading_pair.split("-")[0] == base_asset])
 

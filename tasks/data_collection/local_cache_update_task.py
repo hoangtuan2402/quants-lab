@@ -96,9 +96,6 @@ if __name__ == "__main__":
         "connector_name": "binance_perpetual",
         "output_dir": "data/candles",  # Use root path here
         "timescale_config": timescale_config,
-        "selected_pairs": ['1000SHIB-USDT', 'WLD-USDT', 'ACT-USDT', '1000BONK-USDT', 'DOGE-USDT', 'AGLD-USDT',
-                           'SUI-USDT', '1000SATS-USDT', 'MOODENG-USDT', 'NEIRO-USDT', 'HBAR-USDT', 'ENA-USDT',
-                           'HMSTR-USDT', 'TROY-USDT', '1000PEPE-USDT', '1000X-USDT', 'PNUT-USDT', 'SOL-USDT',
-                           'XRP-USDT', 'SWELL-USDT'],
+        "selected_pairs": ['BTC-USDT'],
     }
     asyncio.run(main(config))

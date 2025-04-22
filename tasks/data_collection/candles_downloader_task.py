@@ -13,7 +13,7 @@ from core.data_sources import CLOBDataSource
 from core.services.timescale_client import TimescaleClient
 from core.task_base import BaseTask
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=print)
 logging.getLogger("asyncio").setLevel(logging.CRITICAL)
 load_dotenv()
 
@@ -30,13 +30,13 @@ class CandlesDownloaderTask(BaseTask):
 
     async def execute(self):
         now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f UTC")
-        logging.info(
+        print(
             f"{now} - Starting candles downloader for {self.connector_name} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
         end_time = datetime.now(timezone.utc)
         start_time = pd.Timestamp(time.time() - self.days_data_retention * 24 * 60 * 60,
                                   unit="s").tz_localize(timezone.utc).timestamp()
-        logging.info(f"{now} - Start date: {start_time}, End date: {end_time}")
-        logging.info(f"{now} - Quote asset: {self.quote_asset}, Min notional size: {self.min_notional_size}")
+        print(f"{now} - Start date: {start_time}, End date: {end_time}")
+        print(f"{now} - Quote asset: {self.quote_asset}, Min notional size: {self.min_notional_size}")
 
         timescale_client = TimescaleClient(
             host=self.config["timescale_config"].get("db_host", "localhost"),
@@ -48,10 +48,10 @@ class CandlesDownloaderTask(BaseTask):
         await timescale_client.connect()
 
         trading_rules = await self.clob.get_trading_rules(self.connector_name)
-        trading_pairs = trading_rules.get_all_trading_pairs()
+        trading_pairs = trading_rules.get_custom_trading_pairs()
         for i, trading_pair in enumerate(trading_pairs):
             for interval in self.intervals:
-                logging.info(f"{now} - Fetching candles for {trading_pair} [{i} from {len(trading_pairs)}]")
+                print(f"{now} - Fetching candles for {trading_pair} [{i} from {len(trading_pairs)}]")
                 try:
                     table_name = timescale_client.get_ohlc_table_name(self.connector_name, trading_pair, interval)
                     await timescale_client.create_candles_table(table_name)
@@ -69,7 +69,7 @@ class CandlesDownloaderTask(BaseTask):
                     )
 
                     if candles.data.empty:
-                        logging.info(f"{now} - No new trades for {trading_pair}")
+                        print(f"{now} - No new trades for {trading_pair}")
                         continue
 
                     await timescale_client.append_candles(table_name=table_name,
@@ -107,8 +107,8 @@ if __name__ == "__main__":
     config = {
         "connector_name": "binance_perpetual",
         "quote_asset": "USDT",
-        "intervals": ["15m", "1h"],
-        "days_data_retention": 30,
+        "intervals": ["1m", "5m"],
+        "days_data_retention": 365,
         "min_notional_size": 10,
         "timescale_config": timescale_config
     }
